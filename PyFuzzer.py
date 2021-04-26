@@ -6,6 +6,8 @@ from sys import argv, maxsize
 from os import linesep, path
 from time import sleep as delay
 from random import randint
+from multiprocessing.dummy import Pool
+from itertools import repeat
 
 def doHelp(errorMessage, exitCode=1, verbose=False):
     if(exitCode != 0):
@@ -16,7 +18,7 @@ def doHelp(errorMessage, exitCode=1, verbose=False):
     
     p("<opts>:")
     p("\t-(-h)elp\t\t\tShow this help message")
-    p("\t-(t)arget <target>\tTarget mode to use (see <target>)")
+    p("\t-(t)arget <target>\t\tTarget mode to use (see <target>)")
     p("\t-(-o)utput <outputMode>\t\tOutput mode to use (see <outputMode>)")
     p("\t-(-v)erbose\t\t\tTurns on verbose messaging (like this one!)", 'v', True)
     print()
@@ -38,6 +40,9 @@ verbose = False
 skipThisIteration = False
 seed = str(randint(-int(maxsize)-1,int(maxsize)))
 onlineHosts = 0
+hosts = []
+userChoice = ""
+openPorts = []
 
 if len(argv) == 1:
     doHelp("Argumental error", 1)
@@ -101,18 +106,34 @@ if outputFile != (seed + "STDOUT" + seed):
 if targetHost == (seed + "scan" + seed):
     for host in (parseScan(hostScan(getPrivateIP()), getPrivateIP())[0]):
         onlineHosts += 1
+        hosts.append(host)
         p(host + " was found online", 's')
+
     if onlineHosts == 0:
         doHelp("No hosts appear to be online", 4, verbose)
     elif onlineHosts == 1:
-        p("One host appears to be online, please re-run this program with <ip> specified!", 'w')
+        userChoice = i("One host appears to be online, would you like to use this one? [Y/n]")
+        if userChoice.lower() in ["y", "yes", ""]:
+            targetHost = hosts[0]
+        else:
+            doHelp("No host spewcified", 5, verbose)
     else:
-        p("Multiple hosts appear to be online!, please re-run this program with <ip> specified!", 's')
+        p("Multiple hosts appear to be online!, please choose one below:", 's')
+        for host in hosts:
+            p("[" + str(hosts.index(host)) + "] " + host)
+
+        userChoice = i("Host index: ")
+        if userChoice in ["{:d}".format(x) for x in range(len(hosts))]:
+            targetHost = hosts[int(userChoice)]
+        else:
+            doHelp("Host index " + userChoice + " out of range: 0-" + str(len(hosts) - 1), 6)
+
+p("Portscanning " + targetHost)
 
 p("ToDo:")
 p("- Add CLA parser", 's')
 p("- Verify CLA variables", 's')
-p("- Scan network (or add host manually)")
+p("- Scan network (or add host manually)", 's')
 p("- Port scan host")
 p("- Select ports to fuzz, or all")
 p("- Send all data to port, or autodetect service")
