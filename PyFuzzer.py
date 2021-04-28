@@ -104,7 +104,7 @@ if outputFile != (seed + "STDOUT" + seed):
             f.write("# Start of " + outputFile)
 
 if targetHost == (seed + "scan" + seed):
-    for host in (parseScan(hostScan(getPrivateIP()), getPrivateIP())[0]):
+    for host in hostScan(getPrivateIP()):
         onlineHosts += 1
         hosts.append(host)
         p(host + " was found online", 's')
