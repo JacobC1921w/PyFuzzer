@@ -129,6 +129,19 @@ if targetHost == (seed + "scan" + seed):
             doHelp("Host index " + userChoice + " out of range: 0-" + str(len(hosts) - 1), 6)
 
 p("Portscanning " + targetHost)
+p("Reading from ./Top1000Ports.txt", 'v', verbose)
+portList = []
+with open("./Top1000Ports.txt", 'r') as f:
+    for line in f:
+        line = line.strip()
+        portList.append(int(line))
+p("Done", 'v', verbose)
+
+openPorts = getOpenPortsFromList(targetHost, portList, 15, 1.5)
+for port in openPorts:
+    p('[' + str(openPorts.index(port)) + '] ' + str(port), 's')
+userChoice = i("Port index: ")
+
 
 p("ToDo:")
 p("- Add CLA parser", 's')
